@@ -18,8 +18,8 @@ initDb config =
   createPostgresqlPool (view config connectionString)
                        (view config poolSize)
 
-queryHandler :: SqlPersistM b -> Handler a ConnectionPool b
-queryHandler query =
+sqlHandler :: SqlPersistM b -> Handler a ConnectionPool b
+sqlHandler query =
   do connection <- get
      liftIO $
        runSqlPersistMPool query connection
