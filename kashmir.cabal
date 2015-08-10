@@ -1,0 +1,54 @@
+name:                kashmir
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            https://github.com/krisajenkins/kashmir
+license:             BSD3
+license-file:        LICENSE.txt
+author:              Kris Jenkins
+maintainer:          krisajenkins@gmail.com
+-- copyright:
+category:            Web
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Kashmir.Database.Postgresql, Kashmir.ETL Kashmir.Aeson
+  default-extensions: OverloadedStrings
+  build-depends:       base >= 4.7 && < 5
+                     , persistent
+                     , aeson
+                     , bytestring
+                     , lifted-base >= 0.2.3.1
+                     , mtl
+                     , time >= 1.4.2
+                     , transformers >= 0.3.0.0
+                     , esqueleto >= 2.2.11 && < 3.0
+                     , binary
+                     , pipes
+                     , pipes-parse
+                     , pipes-bytestring
+                     , pipes-binary
+                     , monad-logger
+                     , lens
+                     , text
+                     , wreq
+                     , postgresql-simple
+                     , persistent-postgresql
+                     , persistent-template
+  default-language:    Haskell2010
+
+test-suite Kashmir-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , Kashmir
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/krisajenkins/kashmir.git
