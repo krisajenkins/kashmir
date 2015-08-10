@@ -1,0 +1,9 @@
+* Kashmir
+
+A rag-tag grab bag of Haskell useful generic Haskell code. Published for my benefit,
+but feel free to use it if you wish.
+
+** Why Kashmir?
+
+I was playing around with the letter from 'Kris' and 'Haskell' and listening to
+Led Zepplin.

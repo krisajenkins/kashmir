@@ -1,0 +1,6 @@
+flags: {}
+packages:
+- '.'
+extra-deps:
+- esqueleto-2.2.11
+resolver: lts-2.20
