@@ -1,8 +1,5 @@
-module Kashmir.ETL
-       (module Kashmir.ETL.Download, module Kashmir.ETL.Pipes,
-        module Kashmir.ETL.Unfold)
-       where
+module Kashmir.ETL (module X) where
 
-import           Kashmir.ETL.Download
-import           Kashmir.ETL.Pipes
-import           Kashmir.ETL.Unfold
+import           Kashmir.ETL.Download as X
+import           Kashmir.ETL.Pipes    as X
+import           Kashmir.ETL.Unfold   as X
