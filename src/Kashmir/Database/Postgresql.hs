@@ -5,7 +5,7 @@
 {-# LANGUAGE TemplateHaskell     #-}
 module Kashmir.Database.Postgresql
        (insertUnlessDuplicate, upsert, runSql, trim_, array_,
-        connectionDetails, regexpReplace_, DbConfig(..), connectionString,
+        connectionDetails, regexpReplace_, DatabaseConfig(..), connectionString,
         poolSize)
        where
 
@@ -15,6 +15,7 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Logger
 import           Data.Aeson                      hiding (Value)
+import           Data.Aeson.TH                   (deriveJSON)
 import qualified Data.ByteString.Char8           as BC
 import           Data.Maybe
 import           Data.String
@@ -28,16 +29,12 @@ import           GHC.Generics
 import           Kashmir.Aeson
 import           Prelude                         hiding (product)
 
-data DbConfig =
-  DbConfig {_connectionString :: String
-           ,_poolSize         :: Int}
+data DatabaseConfig =
+  DatabaseConfig {_connectionString :: String
+           ,_poolSize               :: Int}
   deriving (Eq,Show,Generic)
-makeLenses ''DbConfig
-
-instance ToJSON DbConfig where
-  toJSON = genericToJSON $ dropPrefixJSONOptions "_"
-instance FromJSON DbConfig where
-  parseJSON = genericParseJSON $ dropPrefixJSONOptions "_"
+makeLenses ''DatabaseConfig
+$(deriveJSON (dropPrefixJSONOptions "_") ''DatabaseConfig)
 
 sqlErrorCode :: SqlError -> String
 sqlErrorCode = BC.unpack . sqlState
@@ -79,10 +76,10 @@ upsert keyFunction item =
 
 ------------------------------------------------------------
 
-connectionDetails :: DbConfig -> ConnectionString
+connectionDetails :: DatabaseConfig -> ConnectionString
 connectionDetails = BC.pack . view connectionString
 
-runSql :: DbConfig -> SqlPersistM a -> IO a
+runSql :: DatabaseConfig -> SqlPersistM a -> IO a
 runSql dbConfig sql =
   do pool <-
        runNoLoggingT

@@ -11,7 +11,7 @@ import           Database.Persist.Postgresql (createPostgresqlPool)
 import           Kashmir.Database.Postgresql
 import           Snap
 
-initDb :: DbConfig -> SnapletInit a ConnectionPool
+initDb :: DatabaseConfig -> SnapletInit a ConnectionPool
 initDb config =
   makeSnaplet "connection-pool" "A simple Postgresql connection pool" Nothing .
   liftIO . runStdoutLoggingT $
