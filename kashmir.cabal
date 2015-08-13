@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Kashmir.Database.Postgresql, Kashmir.ETL Kashmir.Aeson, Kashmir.Snap.Snaplet.Postgresql, Kashmir.Snap.Snaplet.Random, Kashmir.Web
+  exposed-modules:     Kashmir.Database.Postgresql, Kashmir.ETL, Kashmir.ETL.Download, Kashmir.ETL.Pipes, Kashmir.ETL.Unfold, Kashmir.Aeson, Kashmir.Snap.Snaplet.Postgresql, Kashmir.Snap.Snaplet.Random, Kashmir.Web
   default-extensions: OverloadedStrings
   build-depends:       base >= 4.7 && < 5
                      , persistent
