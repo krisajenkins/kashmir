@@ -5,8 +5,9 @@
 {-# LANGUAGE TemplateHaskell     #-}
 module Kashmir.Database.Postgresql
        (insertUnlessDuplicate, upsert, runSql, trim_, array_,
-        connectionDetails, regexpReplace_, DatabaseConfig(..), connectionString,
-        poolSize)
+        connectionDetails, regexpReplace_, DatabaseConfig(..),
+        connectionString, createSavepoint, releaseSavepoint,
+        rollbackToSavepoint, poolSize)
        where
 
 import           Control.Exception.Lifted
@@ -14,12 +15,12 @@ import           Control.Lens
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Logger
-import           Data.Aeson                      hiding (Value)
 import           Data.Aeson.TH                   (deriveJSON)
 import qualified Data.ByteString.Char8           as BC
 import           Data.Maybe
+import           Data.Monoid
 import           Data.String
-import           Data.Text                       ()
+import           Data.Text                       (Text)
 import           Database.Esqueleto              hiding (update, upsert)
 import           Database.Esqueleto.Internal.Sql
 import           Database.Persist.Postgresql     (ConnectionString,
@@ -104,3 +105,21 @@ regexpReplace_ :: (IsString s)
 regexpReplace_ string pattern replacement flags =
   unsafeSqlFunction "regexp_replace"
                     (string,pattern,replacement,flags)
+
+------------------------------------------------------------
+
+createSavepoint :: Text -> SqlPersistM ()
+createSavepoint savepointName =
+  rawExecute ("SAVEPOINT " <> savepointName)
+             []
+
+
+releaseSavepoint :: Text -> SqlPersistM ()
+releaseSavepoint savepointName =
+  rawExecute ("RELEASE SAVEPOINT " <> savepointName)
+             []
+
+rollbackToSavepoint :: Text -> SqlPersistM ()
+rollbackToSavepoint savepointName =
+  rawExecute ("ROLLBACK TO SAVEPOINT " <> savepointName)
+             []
