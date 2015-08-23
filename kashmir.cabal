@@ -26,6 +26,7 @@ library
                      , lifted-base >= 0.2.3.1
                      , monad-logger
                      , mtl
+                     , stm
                      , persistent
                      , persistent-postgresql
                      , persistent-template

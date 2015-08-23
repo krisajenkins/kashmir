@@ -1,21 +1,28 @@
-module Kashmir.Snap.Snaplet.Random (popRandom,initRandom,RandomNumberGenerator) where
+module Kashmir.Snap.Snaplet.Random (getRandom,initRandom,RandomNumberGenerator) where
 
+import           Control.Concurrent.STM
 import           Control.Monad.IO.Class
-import           Data.IORef
-import           Data.Tuple
+import           Control.Monad.State.Class
 import           Snap
 import           System.Random
 
-newtype RandomNumberGenerator = RandomNumberGenerator (IORef StdGen)
+newtype RandomNumberGenerator = RandomNumberGenerator (TVar StdGen)
 
-popRandom :: Random a => RandomNumberGenerator -> IO a
-popRandom (RandomNumberGenerator io) = atomicModifyIORef io (swap . random)
+popRandom :: Random a => RandomNumberGenerator -> STM a
+popRandom (RandomNumberGenerator tvar) =
+  do rnd <- readTVar tvar
+     let (x,rnd') = random rnd
+     writeTVar tvar rnd'
+     return x
+
+getRandom :: Random a => Handler b RandomNumberGenerator a
+getRandom = get >>= liftIO . atomically . popRandom
 
 initRandom :: SnapletInit a RandomNumberGenerator
 initRandom =
   makeSnaplet "random-number-generator" "A source of randomness." Nothing .
   liftIO $
   do stdGen <- getStdGen
-     ioRef <- newIORef stdGen
+     tvar <- atomically $ newTVar stdGen
      return $
-       RandomNumberGenerator ioRef
+       RandomNumberGenerator tvar
