@@ -102,6 +102,7 @@ makeAuthenticationOptions config =
 
 authRequestUrlsHandler :: Handler b Authentication ()
 authRequestUrlsHandler =
+  method GET $
   do githubConfig <- view (systemConfig . github)
      writeJSON $ makeAuthenticationOptions githubConfig
 
@@ -262,6 +263,7 @@ requireUser lens bad good =
 
 userDetailsHandler :: Handler b Authentication ()
 userDetailsHandler =
+  method GET $
   do logError "Looking up user details."
      connection <- Snap.with dbPool State.get
      authToken <- readAuthToken
@@ -293,10 +295,9 @@ initAuthentication config =
        initDb (view database config)
      randomSnap <-
        nestSnaplet "random" randomNumberGenerator initRandom
-     addRoutes [("/callback/github",githubSignupHandler)
+     addRoutes [("/callback/github",githubCallbackHandler)
                ,("/login",usernamePasswordLoginHandler)
-               ,("/status"
-                ,method GET (userDetailsHandler <|> authRequestUrlsHandler))]
+               ,("/status",(userDetailsHandler <|> authRequestUrlsHandler))]
      wrapSite $ applyCORS defaultOptions
      return Authentication {_dbPool = pool
                            ,_randomNumberGenerator = randomSnap
