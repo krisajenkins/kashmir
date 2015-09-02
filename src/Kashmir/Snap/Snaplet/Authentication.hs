@@ -273,7 +273,7 @@ initAuthentication config =
      randomSnap <-
        nestSnaplet "random" randomNumberGenerator initRandom
      addRoutes [("/callback/github",githubSignupHandler)
-               ,("/auth/login",usernamePasswordLoginHandler)
+               ,("/login",usernamePasswordLoginHandler)
                ,("/status"
                 ,method GET (userDetailsHandler <|> authRequestUrlsHandler))]
      wrapSite $ applyCORS defaultOptions
