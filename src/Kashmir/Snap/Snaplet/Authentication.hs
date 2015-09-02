@@ -11,6 +11,7 @@ import qualified Control.Monad.State.Class                  as State
 import           Crypto.BCrypt
 import           Data.Aeson.TH                              (deriveJSON)
 import           Data.ByteString
+import qualified Data.ByteString.Char8
 import qualified Data.Map                                   as Map
 import           Data.Maybe
 import           Data.Monoid
@@ -222,8 +223,9 @@ processUsernamePassword username password =
 usernamePasswordLoginHandler :: Handler b Authentication ()
 usernamePasswordLoginHandler =
   method POST $
-  do username <- getPostParam "username"
+  do username :: Maybe ByteString <- getPostParam "username"
      password <- getPostParam "password"
+     logError $ (encodeUtf8 "Username was ") <> (Data.ByteString.Char8.pack $ show username)
      case (username,password) of
        (Just u,Just p) ->
          processUsernamePassword u p
