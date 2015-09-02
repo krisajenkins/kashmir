@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
-module Kashmir.Snap.Snaplet.Authentication (initAuthentication,Authentication) where
+module Kashmir.Snap.Snaplet.Authentication (initAuthentication,Authentication,requireUser) where
 
 import           Control.Applicative
 import           Control.Lens                               (makeLenses, view)
@@ -226,6 +226,17 @@ usernamePasswordLoginHandler =
   do Just username <- getPostParam "username"
      Just password <- getPostParam "password"
      processUsernamePassword username password
+
+------------------------------------------------------------
+------------------------------------------------------------
+-- | Require that an authenticated AuthUser is present in the current session.
+-- This function has no DB cost - only checks to see if a user_id is present in the current session.
+requireUser :: SnapletLens v Authentication -> Handler b v a -> Handler b v a -> Handler b v a
+requireUser lens bad good =
+  do authToken <- Snap.with lens readAuthToken
+     case authToken of
+       Nothing -> bad
+       Just _ -> good
 
 ------------------------------------------------------------
 
