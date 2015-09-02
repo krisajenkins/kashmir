@@ -30,9 +30,10 @@ import           GHC.Generics
 import           Kashmir.Aeson
 import           Prelude                         hiding (product)
 
+-- TODO Should we make the connectionString a ByteString? Text? IsString?
 data DatabaseConfig =
   DatabaseConfig {_connectionString :: String
-           ,_poolSize               :: Int}
+                 ,_poolSize         :: Int}
   deriving (Eq,Show,Generic)
 makeLenses ''DatabaseConfig
 $(deriveJSON (dropPrefixJSONOptions "_") ''DatabaseConfig)
