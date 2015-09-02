@@ -221,7 +221,8 @@ lookupByUsername username =
   select $
   from $
   \(account `InnerJoin` passwordAccount) ->
-    do on $ account ^. AccountAccountId ==. passwordAccount ^. PasswordAccountAccountId
+    do on $ account ^. AccountAccountId ==. passwordAccount ^.
+         PasswordAccountAccountId
        where_ (passwordAccount ^. PasswordAccountUsername ==. val username)
        return (account,passwordAccount)
 
@@ -237,8 +238,9 @@ processUsernamePassword username password =
                           connection
      now <- liftIO getCurrentTime
      -- Validate password.
-     if validatePassword (encodeUtf8 (passwordAccountPassword $ entityVal passwordAccount))
-                         password
+     if validatePassword
+          (encodeUtf8 (passwordAccountPassword $ entityVal passwordAccount))
+          password
         then do writeAuthToken (addUTCTime twoWeeks now)
                                (accountAccountId $ entityVal account)
                 redirect $ encodeUtf8 currentHostname
@@ -254,7 +256,10 @@ usernamePasswordLoginHandler =
 ------------------------------------------------------------
 -- | Require that an authenticated AuthUser is present in the current session.
 -- This function has no DB cost - only checks to see if the client has passed a valid auth token.
-requireUser :: SnapletLens v Authentication -> Handler b v a -> Handler b v a -> Handler b v a
+requireUser :: SnapletLens v Authentication
+            -> Handler b v a
+            -> Handler b v a
+            -> Handler b v a
 requireUser lens bad good =
   do authToken <- Snap.with lens readAuthToken
      case authToken of
