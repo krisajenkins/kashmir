@@ -45,6 +45,7 @@ data Authentication =
 makeLenses ''Authentication
 
 
+-- TODO Remove. I don't like throwing exceptions.
 data AuthenticationException
   = MissingParameter ByteString
   | AccountNotFoundException
@@ -169,6 +170,7 @@ writeAuthToken expires accountId =
 
 ------------------------------------------------------------
 
+-- TODO Parameterise.
 twoWeeks :: NominalDiffTime
 twoWeeks = 60 * 60 * 24 * 7 * 2
 
