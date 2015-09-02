@@ -4,14 +4,11 @@ module Kashmir.Snap.Snaplet.Authentication.Config where
 
 import           Control.Lens
 import           Data.Aeson.TH               (deriveJSON)
-import           Data.Monoid
 import           Data.Text
-import           Data.Yaml
 import           GHC.Generics
 import           Kashmir.Aeson
 import           Kashmir.Database.Postgresql (DatabaseConfig)
 import qualified Kashmir.Github              as Github
-import           System.Directory
 
 -- TODO The secret should probably be of type Web.JWT.Secret.
 -- That should be as simple as writing a custom fromJSON for Secrets.
