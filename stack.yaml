@@ -4,4 +4,5 @@ packages:
 extra-deps:
 - esqueleto-2.4.2
 - aeson-casing-0.1.0.5
+- snap-cors-1.2.9
 resolver: lts-4.1

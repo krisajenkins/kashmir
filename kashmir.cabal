@@ -45,6 +45,7 @@ library
                      , random
                      , snap >= 0.13 && < 0.15
                      , snap-core >= 0.9 && < 1
+                     , snap-cors
                      , text
                      , time >= 1.4.2
                      , transformers >= 0.3.0.0

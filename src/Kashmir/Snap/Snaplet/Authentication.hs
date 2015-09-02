@@ -36,6 +36,7 @@ import           Snap                                       hiding (Config,
                                                              with)
 import qualified Snap
 import           System.Random
+import           Snap.CORS
 import           Web.JWT                                    as JWT hiding
                                                                     (header)
 
@@ -265,6 +266,7 @@ initAuthentication config =
                ,("/auth/login",usernamePasswordLoginHandler)
                ,("/status"
                 ,method GET (userDetailsHandler <|> authRequestUrlsHandler))]
+     wrapSite $ applyCORS defaultOptions
      return Authentication {_dbPool = pool
                            ,_randomNumberGenerator = randomSnap
                            ,_systemConfig = config}
