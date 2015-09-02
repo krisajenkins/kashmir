@@ -35,7 +35,6 @@ import           Kashmir.Web
 import           Snap                                       hiding (Config,
                                                              with)
 import qualified Snap
-import           System.Random
 import           Snap.CORS
 import           Web.JWT                                    as JWT hiding
                                                                     (header)
