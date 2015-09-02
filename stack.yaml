@@ -2,4 +2,6 @@ flags: {}
 packages:
 - '.'
 extra-deps:
+- esqueleto-2.4.2
+- aeson-casing-0.1.0.5
 resolver: lts-4.1

@@ -15,22 +15,15 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Kashmir.Aeson
-                     , Kashmir.Database.Postgresql
-                     , Kashmir.ETL.Download
-                     , Kashmir.ETL.Pipes
-                     , Kashmir.ETL.Unfold
-                     , Kashmir.ETL
-                     , Kashmir.Snap.Snaplet.Postgresql
-                     , Kashmir.Snap.Snaplet.Random
-                     , Kashmir.Snap.Utils
-                     , Kashmir.UUID
-                     , Kashmir.Web
+  exposed-modules:     Kashmir.Aeson, Kashmir.Database.Postgresql, Kashmir.ETL.Download, Kashmir.ETL.Pipes, Kashmir.ETL.Unfold, Kashmir.ETL, Kashmir.Github.Api, Kashmir.Github.Types, Kashmir.Github, Kashmir.Snap.Snaplet.Authentication.Config, Kashmir.Snap.Snaplet.Authentication.Schema, Kashmir.Snap.Snaplet.Authentication, Kashmir.Snap.Snaplet.Postgresql, Kashmir.Snap.Snaplet.Random, Kashmir.UUID, Kashmir.Web
 
   default-extensions:
   build-depends:       aeson
+                     , aeson-casing
                      , base >= 4.7 && < 5
                      , binary
+                     , MonadCatchIO-transformers >= 0.3.1.3
+                     , bcrypt
                      , bytestring
                      , http-api-data
                      , esqueleto >= 2.2.11 && < 3.0
@@ -38,6 +31,7 @@ library
                      , lifted-base >= 0.2.3.1
                      , monad-logger
                      , mtl
+                     , bcrypt
                      , stm
                      , persistent
                      , persistent-postgresql
@@ -54,7 +48,11 @@ library
                      , text
                      , time >= 1.4.2
                      , transformers >= 0.3.0.0
+                     , containers
+                     , directory >= 1.2.2.0
                      , uuid
+                     , jwt
+                     , yaml
                      , wreq
   default-language:    Haskell2010
   default-extensions:
