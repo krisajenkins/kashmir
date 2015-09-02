@@ -46,11 +46,3 @@ data Config =
 
 makeLenses ''Config
 $(deriveJSON (dropPrefixJSONOptions "_") ''Config)
-
-loadConfig ::  IO (Either ParseException Config)
-loadConfig =
-  do homeDirectory <- getHomeDirectory
-     let configFile = homeDirectory <> "/.git-dash.yaml"
-     putStrLn $
-       "Reading config: " <> configFile
-     decodeFileEither configFile
