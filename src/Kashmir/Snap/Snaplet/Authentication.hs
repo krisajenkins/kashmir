@@ -11,9 +11,7 @@ import qualified Control.Monad.State.Class                  as State
 import           Crypto.BCrypt
 import           Data.Aeson.TH                              (deriveJSON)
 import           Data.ByteString
-import qualified Data.ByteString.Char8
 import qualified Data.Map                                   as Map
-import           Data.Maybe
 import           Data.Monoid
 import           Data.Text                                  (Text)
 import           Data.Text.Encoding
@@ -55,12 +53,42 @@ data AuthenticationException
 
 instance Exception AuthenticationException
 
-
 data AuthenticationOptions = AuthenticationOptions {_github :: String}
   deriving (Eq,Show,Generic)
 
 $(deriveJSON (dropPrefixJSONOptions "_")
              ''AuthenticationOptions)
+
+------------------------------------------------------------
+
+requireParam :: MonadSnap m
+             => ByteString -> m ByteString
+requireParam name =
+  do value <- getParam name
+     case value of
+       Just x -> return x
+       Nothing ->
+         do modifyResponse $
+              setResponseStatus
+                400
+                (encodeUtf8 "Missing parameter: " <>
+                 name)
+            response <- getResponse
+            finishWith response
+
+requirePostParam :: MonadSnap m => ByteString -> m ByteString
+requirePostParam name =
+  do value <- getPostParam name
+     case value of
+       Just x -> return x
+       Nothing ->
+         do modifyResponse $
+              setResponseStatus
+                400
+                (encodeUtf8 "Missing parameter: " <>
+                 name)
+            response <- getResponse
+            finishWith response
 
 ------------------------------------------------------------
 
@@ -177,18 +205,11 @@ processGithubAccessToken code =
                     (unAccountKey accountKey)
      redirect $ encodeUtf8 currentHostname
 
-githubSignupHandler :: Handler b Authentication ()
-githubSignupHandler =
-  let parameterName = "code"
-  in do code <- getParam parameterName
-        logError $
-          "Signup using code: " <>
-          fromMaybe "<none>" code
-        case code of
-          Nothing ->
-            throw $
-            MissingParameter parameterName
-          Just c -> processGithubAccessToken c
+githubCallbackHandler :: Handler b Authentication ()
+githubCallbackHandler =
+  method GET $
+  requireParam "code" >>=
+  processGithubAccessToken
 
 ------------------------------------------------------------
 
@@ -223,22 +244,13 @@ processUsernamePassword username password =
 usernamePasswordLoginHandler :: Handler b Authentication ()
 usernamePasswordLoginHandler =
   method POST $
-  do username :: Maybe ByteString <- getPostParam "username"
-     password <- getPostParam "password"
-     logError $ (encodeUtf8 "Username was ") <> (Data.ByteString.Char8.pack $ show username)
-     case (username,password) of
-       (Just u,Just p) ->
-         processUsernamePassword u p
-       _ ->
-         do modifyResponse $
-              setResponseStatus 400 "Missing parameters."
-            response <- getResponse
-            finishWith response
+  do username <- requirePostParam "username"
+     password <- requirePostParam "password"
+     processUsernamePassword username password
 
 ------------------------------------------------------------
-------------------------------------------------------------
 -- | Require that an authenticated AuthUser is present in the current session.
--- This function has no DB cost - only checks to see if a user_id is present in the current session.
+-- This function has no DB cost - only checks to see if the client has passed a valid auth token.
 requireUser :: SnapletLens v Authentication -> Handler b v a -> Handler b v a -> Handler b v a
 requireUser lens bad good =
   do authToken <- Snap.with lens readAuthToken
