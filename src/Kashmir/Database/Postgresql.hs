@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell     #-}
 module Kashmir.Database.Postgresql
        (insertUnlessDuplicate, upsert, runSql, trim_, array_,
