@@ -222,9 +222,16 @@ processUsernamePassword username password =
 usernamePasswordLoginHandler :: Handler b Authentication ()
 usernamePasswordLoginHandler =
   method POST $
-  do Just username <- getPostParam "username"
-     Just password <- getPostParam "password"
-     processUsernamePassword username password
+  do username <- getPostParam "username"
+     password <- getPostParam "password"
+     case (username,password) of
+       (Just u,Just p) ->
+         processUsernamePassword u p
+       _ ->
+         do modifyResponse $
+              setResponseStatus 400 "Missing parameters."
+            response <- getResponse
+            finishWith response
 
 ------------------------------------------------------------
 ------------------------------------------------------------
