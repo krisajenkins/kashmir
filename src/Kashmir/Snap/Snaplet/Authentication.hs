@@ -243,7 +243,7 @@ processUsernamePassword username password =
           password
         then do writeAuthToken (addUTCTime twoWeeks now)
                                (accountAccountId $ entityVal account)
-                redirect $ encodeUtf8 currentHostname
+                writeJSON $ entityVal account
         else throw Unauthenticated
 
 usernamePasswordLoginHandler :: Handler b Authentication ()
