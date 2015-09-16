@@ -1,5 +1,5 @@
 name:                kashmir
-version:             0.2.0.0
+version:             0.2.1.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            https://github.com/krisajenkins/kashmir
@@ -15,7 +15,18 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Kashmir.Database.Postgresql, Kashmir.UUID, Kashmir.ETL, Kashmir.ETL.Download, Kashmir.ETL.Pipes, Kashmir.ETL.Unfold, Kashmir.Aeson, Kashmir.Snap.Snaplet.Postgresql, Kashmir.Snap.Snaplet.Random, Kashmir.Web
+  exposed-modules:     Kashmir.Aeson
+                     , Kashmir.Database.Postgresql
+                     , Kashmir.ETL.Download
+                     , Kashmir.ETL.Pipes
+                     , Kashmir.ETL.Unfold
+                     , Kashmir.ETL
+                     , Kashmir.Snap.Snaplet.Postgresql
+                     , Kashmir.Snap.Snaplet.Random
+                     , Kashmir.Snap.Utils
+                     , Kashmir.UUID
+                     , Kashmir.Web
+
   default-extensions: OverloadedStrings
   build-depends:       aeson
                      , base >= 4.7 && < 5
