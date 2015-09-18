@@ -1,4 +1,5 @@
 {-# LANGUAGE InstanceSigs #-}
+{-# OPTIONS -fno-warn-orphans #-}
 module Kashmir.UUID (toStrictByteString, module X) where
 
 import           Data.Aeson
