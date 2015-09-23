@@ -6,7 +6,8 @@ module Kashmir.Database.Postgresql
        (insertUnlessDuplicate, upsert, runSql, trim_, array_,
         connectionDetails, regexpReplace_, DatabaseConfig(..),
         connectionString, createSavepoint, releaseSavepoint,
-        rollbackToSavepoint, poolSize)
+        rollbackToSavepoint, poolSize,
+        toTsquery, toTsvector, (@@.))
        where
 
 import           Control.Exception.Lifted
@@ -123,3 +124,19 @@ rollbackToSavepoint :: Text -> SqlPersistM ()
 rollbackToSavepoint savepointName =
   rawExecute ("ROLLBACK TO SAVEPOINT " <> savepointName)
              []
+
+------------------------------------------------------------
+-- Full Text Search
+
+data TSQuery
+data TSVector
+
+toTsquery :: IsString s
+          => SqlExpr (Value s) -> SqlExpr (Value TSQuery)
+toTsquery = unsafeSqlFunction "to_tsquery"
+
+toTsvector :: IsString s => SqlExpr (Value s) -> SqlExpr (Value TSVector)
+toTsvector = unsafeSqlFunction "to_tsvector"
+
+(@@.) :: SqlExpr (Value TSVector) -> SqlExpr (Value TSQuery) -> SqlExpr (Value Bool)
+(@@.) = unsafeSqlBinOp " @@ "
