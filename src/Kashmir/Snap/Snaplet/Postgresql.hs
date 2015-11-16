@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Kashmir.Snap.Snaplet.Postgresql where
 
 import           Control.Lens
@@ -18,7 +19,8 @@ initDb config =
   createPostgresqlPool (C.pack (view connectionString config))
                        (view poolSize config)
 
-sqlHandler :: SqlPersistM b -> Handler a ConnectionPool b
+sqlHandler :: (MonadIO m,MonadState ConnectionPool m)
+           => SqlPersistM a -> m a
 sqlHandler query =
   do connection <- get
      liftIO $
