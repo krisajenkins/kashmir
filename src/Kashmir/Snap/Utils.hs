@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Kashmir.Snap.Utils
        (requireParam, requirePostParam) where
 

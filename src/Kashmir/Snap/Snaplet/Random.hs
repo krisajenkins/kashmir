@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Kashmir.Snap.Snaplet.Random (getRandom,initRandom,RandomNumberGenerator) where
 
 import           Control.Concurrent.STM

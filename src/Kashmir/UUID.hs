@@ -1,4 +1,5 @@
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS -fno-warn-orphans #-}
 module Kashmir.UUID (toStrictByteString, module X) where
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Kashmir.Web where
 
 import           Data.Aeson
