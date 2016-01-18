@@ -32,6 +32,7 @@ library
                      , base >= 4.7 && < 5
                      , binary
                      , bytestring
+                     , http-api-data
                      , esqueleto >= 2.2.11 && < 3.0
                      , lens
                      , lifted-base >= 0.2.3.1

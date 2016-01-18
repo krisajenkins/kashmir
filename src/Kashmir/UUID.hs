@@ -12,6 +12,7 @@ import           Data.Text.Encoding   (decodeUtf8, encodeUtf8)
 import           Data.UUID            as X
 import           Database.Persist
 import           Database.Persist.Sql
+import           Web.HttpApiData
 import           Web.PathPieces
 
 instance PersistField UUID where
@@ -40,6 +41,15 @@ instance ToJSON UUID where
 instance PathPiece UUID where
   fromPathPiece = fromText
   toPathPiece = toText
+
+instance ToHttpApiData UUID where
+  toUrlPiece = toText
+
+instance FromHttpApiData UUID where
+  parseUrlPiece piece =
+    case fromText piece of
+      Nothing -> Left "Cannot parse UUID."
+      Just x -> Right x
 
 toStrictByteString :: UUID -> ByteString
 toStrictByteString = toStrict . toByteString
