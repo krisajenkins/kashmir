@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
-module Kashmir.Snap.Snaplet.Authentication (initAuthentication,Authentication,requireUser) where
+module Kashmir.Snap.Snaplet.Authentication
+       (initAuthentication, Authentication, requireUser) where
 
 import           Control.Applicative
 import           Control.Lens                               (makeLenses, view)
