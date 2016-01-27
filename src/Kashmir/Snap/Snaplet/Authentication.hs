@@ -231,8 +231,6 @@ processUsernamePassword :: ByteString -> ByteString -> Handler b Authentication 
 processUsernamePassword username password =
   do connection <- Snap.with dbPool State.get
      -- Select account pair.
-     currentHostname <-
-       view (systemConfig . webserver . hostname)
      [(account,passwordAccount)] <-
        liftIO $
        runSqlPersistMPool (lookupByUsername (decodeUtf8 username))
