@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Kashmir.Aeson, Kashmir.Database.Postgresql, Kashmir.ETL.Download, Kashmir.ETL.Pipes, Kashmir.ETL.Unfold, Kashmir.ETL, Kashmir.Github.Api, Kashmir.Github.Types, Kashmir.Github, Kashmir.Snap.Utils, Kashmir.Snap.Snaplet.Authentication.Config, Kashmir.Snap.Snaplet.Authentication.Schema, Kashmir.Snap.Snaplet.Authentication, Kashmir.Snap.Snaplet.Postgresql, Kashmir.Snap.Snaplet.Random, Kashmir.UUID, Kashmir.Web
+  exposed-modules:     Kashmir.Aeson, Kashmir.Database.Postgresql, Kashmir.ETL.Download, Kashmir.ETL.Pipes, Kashmir.ETL.Unfold, Kashmir.ETL, Kashmir.Github.Api, Kashmir.Github.Types, Kashmir.Github, Kashmir.Snap.Utils, Kashmir.Snap.Snaplet.Postgresql, Kashmir.Snap.Snaplet.Random, Kashmir.UUID, Kashmir.Web
 
   default-extensions:
   build-depends:       aeson
