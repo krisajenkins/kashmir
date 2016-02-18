@@ -1,8 +1,8 @@
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE GADTs             #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric    #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GADTs            #-}
-{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Kashmir.Database.Postgresql
        (insertUnlessDuplicate, upsert, runSql, trim_, array_,
         connectionDetails, regexpReplace_, DatabaseConfig(..),
@@ -139,5 +139,8 @@ toTsquery = unsafeSqlFunction "to_tsquery"
 toTsvector :: IsString s => SqlExpr (Value s) -> SqlExpr (Value TSVector)
 toTsvector = unsafeSqlFunction "to_tsvector"
 
+match :: SqlExpr (Value TSVector) -> SqlExpr (Value TSQuery) -> SqlExpr (Value Bool)
+match = unsafeSqlBinOp " @@ "
+
 (@@.) :: SqlExpr (Value TSVector) -> SqlExpr (Value TSQuery) -> SqlExpr (Value Bool)
-(@@.) = unsafeSqlBinOp " @@ "
+(@@.) = match
