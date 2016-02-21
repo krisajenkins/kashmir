@@ -39,31 +39,6 @@ makeLenses ''AccessTokenResponse
 $(deriveJSON (aesonDrop 1 snakeCase)
              ''AccessTokenResponse)
 
-type URL = Text
-
--- https://developer.github.com/v3/users/
-data User =
-  User {_id                :: Int
-       ,_login             :: Text
-       ,_name              :: Text
-       ,_email             :: Maybe Text
-       ,_avatarUrl         :: URL
-       ,_htmlUrl           :: URL
-       ,_reposUrl          :: URL
-       ,_receivedEventsUrl :: URL
-       ,_company           :: Maybe Text
-       ,_blog              :: Maybe Text
-       ,_location          :: Text
-       ,_hireable          :: Bool
-       ,_bio               :: Maybe Text
-       ,_followers         :: Integer
-       ,_following         :: Integer}
-  deriving (Show,Eq,Generic)
-
-makeLenses ''User
-$(deriveJSON (aesonDrop 1 snakeCase)
-             ''User)
-
 data Config =
   Config {_clientId     :: String
          ,_clientSecret :: String

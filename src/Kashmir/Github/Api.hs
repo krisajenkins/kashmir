@@ -1,22 +1,33 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Kashmir.Github.Api (getUser, requestAccess) where
+module Kashmir.Github.Api
+       (getUser, getOrganizations, requestAccess) where
 
 import           Control.Lens
-import           Data.ByteString      hiding (putStrLn)
+import           Data.Aeson
+import           Data.ByteString                   hiding (putStrLn, unpack)
 import           Data.Monoid
+import           Data.Text
 import           Kashmir.Github.Types
+import           Kashmir.Github.Types.Common
+import           Kashmir.Github.Types.Organization
+import           Kashmir.Github.Types.User
 import           Network.Wreq
 
-getUser :: AccessToken -> IO User
-getUser (AccessToken t) =
-  do r :: Response User <- asJSON =<<
-       getWith (defaults &
-                param "access_token" .~
-                [t])
-               "https://api.github.com/user"
-     putStrLn $ "getUser Response " <> show r
+githubGet :: FromJSON a
+          => URL -> AccessToken -> IO a
+githubGet uri (AccessToken t) =
+  do r <-
+       asJSON =<<
+       getWith (defaults & param "access_token" .~ [t])
+               ("https://api.github.com" <> unpack uri)
      return (view responseBody r)
+
+getUser :: AccessToken -> IO User
+getUser = githubGet "/user"
+
+getOrganizations :: AccessToken -> IO [Organization]
+getOrganizations = githubGet "/user/orgs"
 
 
 -- TODO This doesn't handle a response of:
