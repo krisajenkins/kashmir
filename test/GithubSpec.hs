@@ -3,7 +3,6 @@ module GithubSpec where
 
 import           Control.Error.Safe
 import           Control.Lens
-import           Control.Monad
 import           Data.Monoid
 import           Data.Text                         (pack)
 import           Data.Yaml
