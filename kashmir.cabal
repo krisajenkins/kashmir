@@ -81,6 +81,7 @@ test-suite kashmir-test
   other-modules:       GithubSpec
   build-depends:       base
                      , aeson
+                     , lens
                      , parsec
                      , hspec
                      , hspec-core
