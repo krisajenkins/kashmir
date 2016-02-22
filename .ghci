@@ -1,0 +1,5 @@
+:set -isrc -itest
+:set -package parsec
+:set -package hspec
+:set -package QuickCheck
+:set -package quickcheck-instances
