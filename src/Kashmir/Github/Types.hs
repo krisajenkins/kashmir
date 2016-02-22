@@ -12,7 +12,6 @@ import           Database.Persist
 import           GHC.Generics
 import           Kashmir.Aeson
 
-
 newtype AccessToken = AccessToken { _token :: Text}
   deriving (Show,Read,Eq,Generic)
 

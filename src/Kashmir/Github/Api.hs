@@ -36,13 +36,9 @@ requestAccess :: Config -> ByteString -> IO AccessTokenResponse
 requestAccess config code =
   do r :: Response AccessTokenResponse <-
        asJSON =<<
-       postWith (defaults &
-                 header "Accept" .~
-                 ["application/json"])
+       postWith (defaults & header "Accept" .~ ["application/json"])
                 (view accessUrl config)
                 ["code" := code
-                ,"client_id" :=
-                 view clientId config
-                ,"client_secret" :=
-                 view clientSecret config]
+                ,"client_id" := view clientId config
+                ,"client_secret" := view clientSecret config]
      return (view responseBody r)
