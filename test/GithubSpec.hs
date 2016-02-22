@@ -6,13 +6,14 @@ import           Data.Monoid
 import           Data.Yaml
 import           Kashmir.Github
 import           Kashmir.Github.Types.Organization as GOrg
-import           Kashmir.Github.Types.User         as GUser
+import           Kashmir.Github.Types.Repository   as GRepo
 import           Test.Hspec
 import           Test.QuickCheck.Instances         ()
 
 spec :: Spec
 spec = do userSpec
-          organisationsSpec
+          organizationSpec
+          repositorySpec
 
 userSpec :: Spec
 userSpec =
@@ -21,12 +22,20 @@ userSpec =
        do user <- loadToken >>= getUser
           print user
 
-organisationsSpec :: Spec
-organisationsSpec =
-  describe "Organisations fetching" $
-  do it "Fetches the current organisations." $
+organizationSpec :: Spec
+organizationSpec =
+  describe "Organization fetching" $
+  do it "Fetches the current organizations." $
        do orgs <- loadToken >>= getOrganizations
           print (view GOrg.login <$> orgs)
+
+repositorySpec :: Spec
+repositorySpec =
+  describe "Repository fetching" $
+  do it "Fetches the current repositories." $
+       do repos <- loadToken >>= getRepositories
+          print (view GRepo.name <$> repos)
+          length repos `shouldSatisfy` (> 50)
 
 loadConfig :: IO (Either ParseException AccessToken)
 loadConfig =
