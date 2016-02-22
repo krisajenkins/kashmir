@@ -19,20 +19,20 @@ spec =
 userSpec :: Spec
 userSpec =
   describe "User fetching" $
-  do it "Fetches the current user." $ void (loadToken >>= getUser)
+  it "Fetches the current user." $ void (loadToken >>= getUser)
 
 organizationSpec :: Spec
 organizationSpec =
   describe "Organization fetching" $
-  do it "Fetches the current organizations." $
-       void (loadToken >>= getOrganizations)
+  it "Fetches the current organizations." $
+  void (loadToken >>= getOrganizations)
 
 repositorySpec :: Spec
 repositorySpec =
   describe "Repository fetching" $
-  do it "Fetches the current repositories." $
-       do repos <- loadToken >>= getRepositories
-          length repos `shouldSatisfy` (> 50)
+  it "Fetches the current repositories." $
+  do repos <- loadToken >>= getRepositories
+     length repos `shouldSatisfy` (> 50)
 
 loadConfig :: IO (Either ParseException AccessToken)
 loadConfig = decodeFileEither "kashmir.yaml"
