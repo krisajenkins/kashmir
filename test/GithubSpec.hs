@@ -1,12 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 module GithubSpec where
 
+import           Control.Error.Safe
 import           Control.Lens
+import           Control.Monad
 import           Data.Monoid
+import           Data.Text                         (pack)
 import           Data.Yaml
 import           Kashmir.Github
 import           Kashmir.Github.Types.Organization as GOrg
 import           Kashmir.Github.Types.Repository   as GRepo
+import           System.Environment
 import           Test.Hspec
 import           Test.QuickCheck.Instances         ()
 
@@ -45,7 +49,11 @@ loadConfig =
 
 loadToken :: IO AccessToken
 loadToken =
-  do config <- loadConfig
-     case config of
-       Left e -> fail (show e)
-       Right aToken -> return aToken
+  do envToken <- justErr ("Env var not set" :: String) <$> lookupEnv "GITHUB_ACCESS_TOKEN"
+     case envToken of
+       Right s -> return . AccessToken $ pack s
+       Left _ ->
+         do config <- loadConfig
+            case config of
+              Left e -> fail (show e)
+              Right aToken -> return aToken
