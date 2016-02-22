@@ -21,7 +21,7 @@ data Organization =
                ,_membersUrl       :: URL
                ,_publicMembersUrl :: URL
                ,_avatarUrl        :: URL
-               ,_description      :: Text}
+               ,_description      :: Maybe Text}
   deriving (Show,Eq,Generic)
 
 makeLenses ''Organization
