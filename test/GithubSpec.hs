@@ -14,9 +14,10 @@ import           Test.Hspec
 import           Test.QuickCheck.Instances         ()
 
 spec :: Spec
-spec = do userSpec
-          organizationSpec
-          repositorySpec
+spec =
+  do userSpec
+     organizationSpec
+     repositorySpec
 
 userSpec :: Spec
 userSpec =
@@ -48,7 +49,9 @@ loadConfig =
 
 loadToken :: IO AccessToken
 loadToken =
-  do envToken <- justErr ("Env var not set" :: String) <$> lookupEnv "GITHUB_ACCESS_TOKEN"
+  do envToken <-
+       justErr ("Env var not set" :: String) <$>
+       lookupEnv "GITHUB_ACCESS_TOKEN"
      case envToken of
        Right s -> return . AccessToken $ pack s
        Left _ ->
