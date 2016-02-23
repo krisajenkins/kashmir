@@ -36,9 +36,9 @@ unfoldPages f b =
 
 getRaw :: FromJSON a => AccessToken -> URL -> IO (Response a)
 getRaw (AccessToken t) aUrl =
-  asJSON =<<
   getWith (defaults & param "access_token" .~ [t])
-          (unpack aUrl)
+          (unpack aUrl) >>=
+  asJSON
 
 githubGetPage :: FromJSON a => AccessToken -> Maybe URL -> IO (Maybe ([a], Maybe URL))
 githubGetPage aToken maybeUrl =
