@@ -21,6 +21,7 @@ library
                      , Kashmir.ETL.Pipes
                      , Kashmir.ETL.Unfold
                      , Kashmir.ETL
+                     , Kashmir.Email
                      , Kashmir.Github.Api
                      , Kashmir.Github.Types
                      , Kashmir.Github.Types.Common
