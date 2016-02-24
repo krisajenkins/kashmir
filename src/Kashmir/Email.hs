@@ -11,7 +11,7 @@ import           GHC.Generics
 
 newtype Email =
   Email {unEmail :: Text}
-  deriving (Show,Eq,Generic)
+  deriving (Show,Read,Eq,Generic)
 
 parseEmail :: Text -> Either Text Email
 parseEmail t = Right (Email t)
