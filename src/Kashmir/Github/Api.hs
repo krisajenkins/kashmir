@@ -40,7 +40,9 @@ getRaw (AccessToken t) aUrl =
           (unpack aUrl) >>=
   asJSON
 
-githubGetPage :: FromJSON a => AccessToken -> Maybe URL -> IO (Maybe ([a], Maybe URL))
+githubGetPage
+  :: FromJSON a
+  => AccessToken -> Maybe URL -> IO (Maybe ([a],Maybe URL))
 githubGetPage aToken maybeUrl =
   case maybeUrl of
     Nothing -> return Nothing
