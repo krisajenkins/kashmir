@@ -18,7 +18,6 @@ import           Data.Time
 import           Database.Persist.TH
 import           GHC.Generics
 import           Kashmir.Github.Types.Common
-import           Kashmir.Github.Types.User   (UserId)
 
 share [mkPersist sqlSettings {mpsGenerateLenses = True
                              ,mpsPrefixFields = False}
