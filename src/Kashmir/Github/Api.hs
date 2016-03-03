@@ -8,13 +8,13 @@ module Kashmir.Github.Api
        (getUserDetails, getUserOrganizations, getUserRepositories,requestAccess)
        where
 
-import           Control.Category                  ((.))
+import           Control.Category                    ((.))
 import           Control.Lens
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
 import           Data.Aeson
-import           Data.ByteString                   hiding (pack, putStrLn,
-                                                    unpack)
+import           Data.ByteString                     hiding (pack, putStrLn,
+                                                      unpack)
 import           Data.Monoid
 import           Data.Text
 import           Data.Text.Encoding
@@ -23,13 +23,13 @@ import           Kashmir.Github.Types.Common
 import           Kashmir.Github.Types.Organization
 import           Kashmir.Github.Types.Repository
 import           Kashmir.Github.Types.User
-import           Kashmir.Web                       (mimeTypeJson)
+import           Kashmir.Web                         (mimeTypeJson)
 import           Network.Wreq
-import           Prelude                           hiding (id, (.))
+import           Prelude                             hiding (id, (.))
 import           Text.Boomerang.HStack
 import           Text.Boomerang.TH
-import           Web.Routes                        hiding (URL)
-import           Web.Routes.Boomerang              hiding ((.~))
+import           Web.Routes                          hiding (URL)
+import           Web.Routes.Boomerang                hiding ((.~))
 
 data Sitemap
   = UserDetails
@@ -101,11 +101,10 @@ githubGet :: FromJSON a
           => Sitemap -> ReaderT AccessToken IO a
 githubGet uri = view responseBody <$> getRaw (makeGithubUrl uri)
 
-githubGetPages :: FromJSON a
-               => Sitemap -> ReaderT AccessToken IO [a]
-githubGetPages uri =
-  unfoldPages githubGetPage
-              (Just (makeGithubUrl uri))
+githubGetPages
+  :: FromJSON a
+  => Sitemap -> ReaderT AccessToken IO [a]
+githubGetPages uri = unfoldrM githubGetPage (Just (makeGithubUrl uri))
 
 getUserDetails :: ReaderT AccessToken IO User
 getUserDetails = githubGet UserDetails
