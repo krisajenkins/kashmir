@@ -19,19 +19,17 @@ spec =
 
 userDetailsSpec :: Spec
 userDetailsSpec =
-  describe "User fetching" $
-  it "Fetches the current user." $ void (withToken getUserDetails)
+  describe "User fetching" . it "Fetches the current user." $
+  void (withToken getUserDetails)
 
 userOrganizationSpec :: Spec
 userOrganizationSpec =
-  describe "Organization fetching" $
-  it "Fetches the current organizations." $
+  describe "Organization fetching" . it "Fetches the current organizations." $
   void (withToken getUserOrganizations)
 
 userRepositorySpec :: Spec
 userRepositorySpec =
-  describe "Repository fetching" $
-  it "Fetches the current repositories." $
+  describe "Repository fetching" . it "Fetches the current repositories." $
   do repos <- withToken getUserRepositories
      length repos `shouldSatisfy` (> 50)
 

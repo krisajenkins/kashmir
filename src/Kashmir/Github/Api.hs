@@ -61,7 +61,7 @@ server :: Text
 server = "https://api.github.com"
 
 makeGithubUrl :: Sitemap -> Text
-makeGithubUrl uri = server <> (showSitemap uri)
+makeGithubUrl uri = server <> showSitemap uri
 
 unfoldPages
   :: Monad m
