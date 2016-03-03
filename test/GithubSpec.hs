@@ -3,6 +3,7 @@ module GithubSpec where
 
 import           Control.Error.Safe
 import           Control.Monad
+import           Control.Monad.Reader
 import           Data.Text                 (pack)
 import           Data.Yaml
 import           Kashmir.Github
@@ -19,19 +20,19 @@ spec =
 userDetailsSpec :: Spec
 userDetailsSpec =
   describe "User fetching" $
-  it "Fetches the current user." $ void (loadToken >>= getUserDetails)
+  it "Fetches the current user." $ void (withToken getUserDetails)
 
 userOrganizationSpec :: Spec
 userOrganizationSpec =
   describe "Organization fetching" $
   it "Fetches the current organizations." $
-  void (loadToken >>= getUserOrganizations)
+  void (withToken getUserOrganizations)
 
 userRepositorySpec :: Spec
 userRepositorySpec =
   describe "Repository fetching" $
   it "Fetches the current repositories." $
-  do repos <- loadToken >>= getUserRepositories
+  do repos <- withToken getUserRepositories
      length repos `shouldSatisfy` (> 50)
 
 loadConfig :: IO (Either ParseException AccessToken)
@@ -49,3 +50,6 @@ loadToken =
             case config of
               Left e -> fail (show e)
               Right aToken -> return aToken
+
+withToken :: ReaderT AccessToken IO a -> IO a
+withToken block = loadToken >>= runReaderT block

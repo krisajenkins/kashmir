@@ -10,6 +10,8 @@ module Kashmir.Github.Api
 
 import           Control.Category                  ((.))
 import           Control.Lens
+import           Control.Monad.IO.Class
+import           Control.Monad.Reader
 import           Data.Aeson
 import           Data.ByteString                   hiding (pack, putStrLn,
                                                     unpack)
@@ -72,41 +74,46 @@ unfoldPages f b =
             return $ page <> pages
        Nothing -> return []
 
-getRaw :: FromJSON a => AccessToken -> URL -> IO (Response a)
-getRaw (AccessToken t) aUrl =
-  getWith (defaults & param "access_token" .~ [t])
-          (unpack aUrl) >>=
-  asJSON
+getRaw
+  :: FromJSON a
+  => URL -> ReaderT AccessToken IO (Response a)
+getRaw aUrl =
+  do (AccessToken t) <- ask
+     liftIO $
+       do raw <-
+            getWith (defaults & param "access_token" .~ [t])
+                    (unpack aUrl)
+          asJSON raw
 
 githubGetPage
   :: FromJSON a
-  => AccessToken -> Maybe URL -> IO (Maybe ([a],Maybe URL))
-githubGetPage aToken maybeUrl =
+  => Maybe URL -> ReaderT AccessToken IO (Maybe ([a],Maybe URL))
+githubGetPage maybeUrl =
   case maybeUrl of
     Nothing -> return Nothing
     Just uri ->
-      do r <- getRaw aToken uri
+      do r <- getRaw uri
          return $
            Just (r ^. responseBody
                 ,decodeUtf8 <$> (r ^? responseLink "rel" "next" . linkURL))
 
 githubGet :: FromJSON a
-          => Sitemap -> AccessToken -> IO a
-githubGet uri aToken = view responseBody <$> getRaw aToken (makeGithubUrl uri)
+          => Sitemap -> ReaderT AccessToken IO a
+githubGet uri = view responseBody <$> getRaw (makeGithubUrl uri)
 
 githubGetPages :: FromJSON a
-               => Sitemap -> AccessToken -> IO [a]
-githubGetPages uri t =
-  unfoldPages (githubGetPage t)
+               => Sitemap -> ReaderT AccessToken IO [a]
+githubGetPages uri =
+  unfoldPages githubGetPage
               (Just (makeGithubUrl uri))
 
-getUserDetails :: AccessToken -> IO User
+getUserDetails :: ReaderT AccessToken IO User
 getUserDetails = githubGet UserDetails
 
-getUserOrganizations :: AccessToken -> IO [Organization]
+getUserOrganizations :: ReaderT AccessToken IO [Organization]
 getUserOrganizations = githubGetPages UserOrganizations
 
-getUserRepositories :: AccessToken -> IO [Repository]
+getUserRepositories :: ReaderT AccessToken IO [Repository]
 getUserRepositories = githubGetPages UserRepositories
 
 -- TODO This doesn't handle a response of:
