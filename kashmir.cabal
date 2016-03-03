@@ -28,6 +28,8 @@ library
                      , Kashmir.Github.Types.User
                      , Kashmir.Github.Types.Organization
                      , Kashmir.Github.Types.Repository
+                     , Kashmir.Github.Types.RepositoryHook
+                     , Kashmir.Github.Types.Hook
                      , Kashmir.Github
                      , Kashmir.Snap.Utils
                      , Kashmir.Snap.Snaplet.Postgresql
@@ -45,6 +47,7 @@ library
                      , binary
                      , boomerang
                      , bytestring
+                     , cases
                      , containers
                      , directory >= 1.2.2.0
                      , esqueleto >= 2.2.11 && < 3.0

@@ -13,9 +13,26 @@ import           Test.QuickCheck.Instances ()
 
 spec :: Spec
 spec =
-  do userDetailsSpec
+  do routesSpec
+     userDetailsSpec
      userOrganizationSpec
      userRepositorySpec
+     repositoryHooksSpec
+
+routesSpec :: Spec
+routesSpec =
+  describe "URL Mapping" . it "Sitemap -> Text" $
+  mapM_ (\(url,siteMap) -> toUrl siteMap `shouldBe` url)
+        [("/user",UserDetails)
+        ,("/user/orgs",UserOrganizations)
+        ,("/user/repos",UserRepositories)
+        ,("/repos/kris/project",Repositories "kris" "project" RepositoryDetails)
+        ,("/repos/kris/project/hooks"
+         ,(Repositories "kris" "project" RepositoryHooks))
+        ,("/repos/kris/project/hooks/12345"
+         ,Repositories "kris"
+                       "project"
+                       (RepositoryHook 12345))]
 
 userDetailsSpec :: Spec
 userDetailsSpec =
@@ -32,6 +49,12 @@ userRepositorySpec =
   describe "Repository fetching" . it "Fetches the current repositories." $
   do repos <- withToken getUserRepositories
      length repos `shouldSatisfy` (> 50)
+
+repositoryHooksSpec :: Spec
+repositoryHooksSpec =
+  describe "Repository hook fetching" $
+  it "Fetches the current repository hooks." $
+  void (withToken (getRepositoryHooks "krisajenkins" "yesql"))
 
 loadConfig :: IO (Either ParseException AccessToken)
 loadConfig = decodeFileEither "kashmir.yaml"

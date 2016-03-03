@@ -5,64 +5,79 @@
 {-# LANGUAGE TypeFamilies        #-}
 {-# LANGUAGE TypeOperators       #-}
 module Kashmir.Github.Api
-       (getUserDetails, getUserOrganizations, getUserRepositories,requestAccess)
+       (getUserDetails, getUserOrganizations, getUserRepositories,getRepositoryHooks
+       ,requestAccess,createRepositoryHook,deleteRepositoryHook,toUrl,Sitemap(..),RepositorySitemap(..))
        where
 
 import           Control.Category                    ((.))
+import           Control.Exception                   (try)
 import           Control.Lens
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
 import           Data.Aeson
 import           Data.ByteString                     hiding (pack, putStrLn,
                                                       unpack)
+import           Data.Maybe
 import           Data.Monoid
 import           Data.Text
 import           Data.Text.Encoding
 import           Kashmir.ETL.Unfold
 import           Kashmir.Github.Types
 import           Kashmir.Github.Types.Common
+import           Kashmir.Github.Types.Hook           (Hook)
 import           Kashmir.Github.Types.Organization
 import           Kashmir.Github.Types.Repository
+import qualified Kashmir.Github.Types.RepositoryHook as RH
 import           Kashmir.Github.Types.User
 import           Kashmir.Web                         (mimeTypeJson)
 import           Network.Wreq
-import           Prelude                             hiding (id, (.))
+import           Prelude                             hiding ((.))
 import           Text.Boomerang.HStack
 import           Text.Boomerang.TH
+import           Text.Printf
 import           Web.Routes                          hiding (URL)
 import           Web.Routes.Boomerang                hiding ((.~))
+
+data RepositorySitemap
+  = RepositoryDetails
+  | RepositoryHooks
+  | RepositoryHook Int
+  deriving (Eq,Ord,Read,Show)
 
 data Sitemap
   = UserDetails
   | UserOrganizations
   | UserRepositories
+  | Repositories Text Text RepositorySitemap
   deriving (Eq,Ord,Read,Show)
 
+makeBoomerangs ''RepositorySitemap
 makeBoomerangs ''Sitemap
 
 sitemap :: Router () (Sitemap :- ())
-sitemap = mconcat ["user" . users]
+sitemap =
+  mconcat ["user" . users
+          ,"repos" . rRepositories </> anyText </> anyText . repos]
   where users =
           mconcat [rUserDetails
                   ,rUserOrganizations </> "orgs"
                   ,rUserRepositories </> "repos"]
+        repos =
+          mconcat [rRepositoryDetails
+                  ,rRepositoryHooks </> "hooks"
+                  ,rRepositoryHook </> "hooks" </> int]
 
-handle ::  Sitemap -> RouteT Sitemap IO Text
-handle aUrl =
-  case aUrl of
-    UserDetails -> return "index!"
+toUrl :: Sitemap -> Text
+toUrl s =
+  fromMaybe (error (printf "Cannot convert to URL: %s" (show s)))
+            (toPathInfo <$> unparseTexts sitemap s)
 
-site :: Site Sitemap (IO Text)
-site = boomerangSiteRouteT handle sitemap
-
-showSitemap :: Sitemap -> Text
-showSitemap aUrl = uncurry encodePathInfo $ formatPathSegments site aUrl
 
 server :: Text
 server = "https://api.github.com"
 
 makeGithubUrl :: Sitemap -> Text
-makeGithubUrl uri = server <> showSitemap uri
+makeGithubUrl uri = server <> toUrl uri
 
 getRaw
   :: FromJSON a
@@ -74,6 +89,38 @@ getRaw aUrl =
             getWith (defaults & param "access_token" .~ [t])
                     (unpack aUrl)
           asJSON raw
+
+postRaw
+  :: (ToJSON a,FromJSON b)
+  => URL -> a -> ReaderT AccessToken IO b
+postRaw aUrl payload =
+  do (AccessToken t) <- ask
+     liftIO $
+       do response <-
+            postWith (defaults & param "access_token" .~ [t])
+                     (unpack aUrl)
+                     (toJSON payload)
+          view responseBody <$> asJSON response
+
+deleteRaw :: FromJSON a
+          => URL -> ReaderT AccessToken IO a
+deleteRaw aUrl =
+  do (AccessToken t) <- ask
+     liftIO $
+       do response <-
+            deleteWith (defaults & param "access_token" .~ [t])
+                     (unpack aUrl)
+          view responseBody <$> asJSON response
+
+postGithub
+  :: (ToJSON a,FromJSON b)
+  => Sitemap -> a -> ReaderT AccessToken IO b
+postGithub uri = postRaw (makeGithubUrl uri)
+
+deleteGithub
+  :: FromJSON a
+  => Sitemap -> ReaderT AccessToken IO a
+deleteGithub uri = deleteRaw (makeGithubUrl uri)
 
 githubGetPage
   :: FromJSON a
@@ -105,15 +152,27 @@ getUserOrganizations = githubGetPages UserOrganizations
 getUserRepositories :: ReaderT AccessToken IO [Repository]
 getUserRepositories = githubGetPages UserRepositories
 
+getRepositoryHooks :: Text -> Text -> ReaderT AccessToken IO [RepositoryHook]
+getRepositoryHooks user repo = githubGetPages (RepositoryHooks user repo)
+
 -- TODO This doesn't handle a response of:
 --  responseBody = "{\"error\":\"bad_verification_code\",\"error_description\":\"The code passed is incorrect or expired.\",\"error_uri\":\"https://developer.github.com/v3/oauth/#bad-verification-code\"}"
 requestAccess :: Config -> ByteString -> IO AccessTokenResponse
 requestAccess config code =
-  do r :: Response AccessTokenResponse <-
-       asJSON =<<
+  do response <-
        postWith (defaults & header "Accept" .~ [mimeTypeJson])
                 (view accessUrl config)
                 ["code" := code
                 ,"client_id" := view clientId config
                 ,"client_secret" := view clientSecret config]
-     return (view responseBody r)
+     view responseBody <$> asJSON response
+
+createRepositoryHook
+  :: Text -> Text -> Hook -> ReaderT AccessToken IO RH.RepositoryHook
+createRepositoryHook user repo =
+  postGithub (Repositories user repo RepositoryHooks)
+
+deleteRepositoryHook
+  :: Text -> Text -> Int -> ReaderT AccessToken IO ()
+deleteRepositoryHook user repo hookId =
+  deleteGithub (Repositories user repo (RepositoryHook hookId))
