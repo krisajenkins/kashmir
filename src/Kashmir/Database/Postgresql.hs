@@ -98,15 +98,15 @@ array_ = unsafeSqlFunction "array"
 
 trim_ :: IsString s
       => SqlExpr (Value s) -> SqlExpr (Value s) -> SqlExpr (Value s)
-trim_ pattern target =
+trim_ regex target =
   unsafeSqlFunction "trim"
-                    (unsafeSqlBinOp "FROM" pattern target)
+                    (unsafeSqlBinOp "FROM" regex target)
 
 regexpReplace_ :: (IsString s)
                => SqlExpr (Value s) -> SqlExpr (Value s) -> SqlExpr (Value s) -> SqlExpr (Value s) -> SqlExpr (Value s)
-regexpReplace_ string pattern replacement flags =
+regexpReplace_ string regex replacement flags =
   unsafeSqlFunction "regexp_replace"
-                    (string,pattern,replacement,flags)
+                    (string,regex,replacement,flags)
 
 ------------------------------------------------------------
 
