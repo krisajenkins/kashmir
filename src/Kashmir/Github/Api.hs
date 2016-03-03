@@ -18,6 +18,7 @@ import           Data.ByteString                     hiding (pack, putStrLn,
 import           Data.Monoid
 import           Data.Text
 import           Data.Text.Encoding
+import           Kashmir.ETL.Unfold
 import           Kashmir.Github.Types
 import           Kashmir.Github.Types.Common
 import           Kashmir.Github.Types.Organization
@@ -62,17 +63,6 @@ server = "https://api.github.com"
 
 makeGithubUrl :: Sitemap -> Text
 makeGithubUrl uri = server <> showSitemap uri
-
-unfoldPages
-  :: Monad m
-  => (b -> m (Maybe ([a],b))) -> b -> m [a]
-unfoldPages f b =
-  do r <- f b
-     case r of
-       Just (page,b') ->
-         do pages <- unfoldPages f b'
-            return $ page <> pages
-       Nothing -> return []
 
 getRaw
   :: FromJSON a
