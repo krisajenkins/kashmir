@@ -12,26 +12,26 @@ import           Test.QuickCheck.Instances ()
 
 spec :: Spec
 spec =
-  do userSpec
-     organizationSpec
-     repositorySpec
+  do userDetailsSpec
+     userOrganizationSpec
+     userRepositorySpec
 
-userSpec :: Spec
-userSpec =
+userDetailsSpec :: Spec
+userDetailsSpec =
   describe "User fetching" $
-  it "Fetches the current user." $ void (loadToken >>= getUser)
+  it "Fetches the current user." $ void (loadToken >>= getUserDetails)
 
-organizationSpec :: Spec
-organizationSpec =
+userOrganizationSpec :: Spec
+userOrganizationSpec =
   describe "Organization fetching" $
   it "Fetches the current organizations." $
-  void (loadToken >>= getOrganizations)
+  void (loadToken >>= getUserOrganizations)
 
-repositorySpec :: Spec
-repositorySpec =
+userRepositorySpec :: Spec
+userRepositorySpec =
   describe "Repository fetching" $
   it "Fetches the current repositories." $
-  do repos <- loadToken >>= getRepositories
+  do repos <- loadToken >>= getUserRepositories
      length repos `shouldSatisfy` (> 50)
 
 loadConfig :: IO (Either ParseException AccessToken)

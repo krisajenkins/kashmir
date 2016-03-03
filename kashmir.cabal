@@ -36,25 +36,28 @@ library
                      , Kashmir.Web
 
   default-extensions:
-  build-depends:       aeson
+  build-depends:       MonadCatchIO-transformers >= 0.3.1.3
+                     , aeson
                      , aeson-casing
                      , base >= 4.7 && < 5
-                     , binary
-                     , MonadCatchIO-transformers >= 0.3.1.3
                      , bcrypt
+                     , bcrypt
+                     , binary
+                     , boomerang
                      , bytestring
-                     , http-api-data
+                     , containers
+                     , directory >= 1.2.2.0
                      , esqueleto >= 2.2.11 && < 3.0
+                     , http-api-data
+                     , jwt
                      , lens
                      , lifted-base >= 0.2.3.1
                      , monad-logger
                      , mtl
-                     , bcrypt
-                     , stm
+                     , path-pieces
                      , persistent
                      , persistent-postgresql
                      , persistent-template
-                     , path-pieces
                      , pipes
                      , pipes-binary
                      , pipes-bytestring
@@ -64,15 +67,15 @@ library
                      , snap >= 0.13 && < 0.15
                      , snap-core >= 0.9 && < 1
                      , snap-cors
+                     , stm
                      , text
                      , time >= 1.4.2
                      , transformers >= 0.3.0.0
-                     , containers
-                     , directory >= 1.2.2.0
                      , uuid
-                     , jwt
-                     , yaml
+                     , web-routes
+                     , web-routes-boomerang
                      , wreq
+                     , yaml
   default-language:    Haskell2010
   default-extensions:
 
