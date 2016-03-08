@@ -21,7 +21,6 @@ import           Data.Maybe
 import           Data.Monoid
 import           Data.Text
 import           Data.Text.Encoding
-import           Kashmir.ETL.Unfold
 import           Kashmir.Github.Types
 import           Kashmir.Github.Types.Common
 import           Kashmir.Github.Types.Hook           (Hook)
@@ -29,6 +28,7 @@ import           Kashmir.Github.Types.Organization
 import           Kashmir.Github.Types.Repository
 import qualified Kashmir.Github.Types.RepositoryHook as RH
 import           Kashmir.Github.Types.User
+import           Kashmir.Unfold
 import           Kashmir.Web                         (mimeTypeJson)
 import           Network.Wreq
 import           Prelude                             hiding ((.))

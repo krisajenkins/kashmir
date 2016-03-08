@@ -19,7 +19,6 @@ library
                      , Kashmir.Database.Postgresql
                      , Kashmir.ETL.Download
                      , Kashmir.ETL.Pipes
-                     , Kashmir.ETL.Unfold
                      , Kashmir.ETL
                      , Kashmir.Email
                      , Kashmir.Github.Api
@@ -35,6 +34,7 @@ library
                      , Kashmir.Snap.Snaplet.Postgresql
                      , Kashmir.Snap.Snaplet.Random
                      , Kashmir.UUID
+                     , Kashmir.Unfold
                      , Kashmir.Web
 
   default-extensions:
