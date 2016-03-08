@@ -68,8 +68,7 @@ upsert keyFunction item =
   where onDuplicateError :: MonadIO m
                          => Either SqlError a -> SqlPersistT m ()
         onDuplicateError (Right _) =
-          rawExecute "RELEASE SAVEPOINT guard_duplicate" [] >>
-          return ()
+          void $ rawExecute "RELEASE SAVEPOINT guard_duplicate" []
         onDuplicateError (Left e)
           | sqlErrorCode e == "23505" =
             do _ <-
