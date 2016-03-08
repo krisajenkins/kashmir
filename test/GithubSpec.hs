@@ -2,14 +2,18 @@
 module GithubSpec where
 
 import           Control.Error.Safe
+import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Reader
-import           Data.Text                 (pack)
+import           Data.Set                            as Set
+import           Data.Text                           (pack)
 import           Data.Yaml
 import           Kashmir.Github
+import           Kashmir.Github.Types.Hook           as Hook
+import qualified Kashmir.Github.Types.RepositoryHook as RH
 import           System.Environment
 import           Test.Hspec
-import           Test.QuickCheck.Instances ()
+import           Test.QuickCheck.Instances           ()
 
 spec :: Spec
 spec =
@@ -22,7 +26,7 @@ spec =
 routesSpec :: Spec
 routesSpec =
   describe "URL Mapping" . it "Sitemap -> Text" $
-  mapM_ (\(url,siteMap) -> toUrl siteMap `shouldBe` url)
+  mapM_ (\(aUrl,siteMap) -> toUrl siteMap `shouldBe` aUrl)
         [("/user",UserDetails)
         ,("/user/orgs",UserOrganizations)
         ,("/user/repos",UserRepositories)
@@ -36,25 +40,42 @@ routesSpec =
 
 userDetailsSpec :: Spec
 userDetailsSpec =
-  describe "User fetching" . it "Fetches the current user." $
-  void (withToken getUserDetails)
+  describe "User fetching" . it "Fetches the current user." . withToken $
+  void getUserDetails
 
 userOrganizationSpec :: Spec
 userOrganizationSpec =
-  describe "Organization fetching" . it "Fetches the current organizations." $
-  void (withToken getUserOrganizations)
+  describe "Organization fetching" . it "Fetches the current organizations." . withToken $
+  void getUserOrganizations
 
 userRepositorySpec :: Spec
 userRepositorySpec =
-  describe "Repository fetching" . it "Fetches the current repositories." $
-  do repos <- withToken getUserRepositories
-     length repos `shouldSatisfy` (> 50)
+  describe "Repository fetching" .
+  it "Fetches the current repositories." . withToken $
+  do repos <- getUserRepositories
+     liftIO $ length repos `shouldSatisfy` (> 50)
 
 repositoryHooksSpec :: Spec
 repositoryHooksSpec =
-  describe "Repository hook fetching" $
-  it "Fetches the current repository hooks." $
-  void (withToken (getRepositoryHooks "krisajenkins" "yesql"))
+  let username = "krisajenkins"
+      repoName = "autoheadline"
+  in describe "Repository hook fetching" $
+     do it "Fetches the current repository hooks." . withToken $
+          void (getRepositoryHooks username repoName)
+        it "Creates and deletes a hook" . withToken $
+          (do let newHook =
+                    Hook {name = Web
+                         ,events = Set.singleton Push
+                         ,active = False
+                         ,config =
+                            HookConfig {url =
+                                          "https://www.jenkster.com/kashmir"
+                                       ,contentType = Json
+                                       ,secret = Nothing
+                                       ,insecureSsl = False}}
+              createdHook <- createRepositoryHook username repoName newHook
+              let createdHookId = view RH.githubRepositoryHookId createdHook
+              deleteRepositoryHook username repoName createdHookId)
 
 loadConfig :: IO (Either ParseException AccessToken)
 loadConfig = decodeFileEither "kashmir.yaml"
@@ -67,8 +88,8 @@ loadToken =
      case envToken of
        Right s -> return . AccessToken $ pack s
        Left _ ->
-         do config <- loadConfig
-            case config of
+         do aConfig <- loadConfig
+            case aConfig of
               Left e -> fail (show e)
               Right aToken -> return aToken
 

@@ -102,24 +102,19 @@ postRaw aUrl payload =
                      (toJSON payload)
           view responseBody <$> asJSON response
 
-deleteRaw :: FromJSON a
-          => URL -> ReaderT AccessToken IO a
+deleteRaw :: Text -> ReaderT AccessToken IO ()
 deleteRaw aUrl =
   do (AccessToken t) <- ask
-     liftIO $
-       do response <-
-            deleteWith (defaults & param "access_token" .~ [t])
-                     (unpack aUrl)
-          view responseBody <$> asJSON response
+     void . liftIO $
+       deleteWith (defaults & param "access_token" .~ [t])
+                  (unpack aUrl)
 
 postGithub
   :: (ToJSON a,FromJSON b)
   => Sitemap -> a -> ReaderT AccessToken IO b
 postGithub uri = postRaw (makeGithubUrl uri)
 
-deleteGithub
-  :: FromJSON a
-  => Sitemap -> ReaderT AccessToken IO a
+deleteGithub :: Sitemap -> ReaderT AccessToken IO ()
 deleteGithub uri = deleteRaw (makeGithubUrl uri)
 
 githubGetPage
@@ -152,8 +147,9 @@ getUserOrganizations = githubGetPages UserOrganizations
 getUserRepositories :: ReaderT AccessToken IO [Repository]
 getUserRepositories = githubGetPages UserRepositories
 
-getRepositoryHooks :: Text -> Text -> ReaderT AccessToken IO [RepositoryHook]
-getRepositoryHooks user repo = githubGetPages (RepositoryHooks user repo)
+getRepositoryHooks :: Text -> Text -> ReaderT AccessToken IO (Either JSONError [RH.RepositoryHook])
+getRepositoryHooks user repo =
+  mapReaderT try $ githubGetPages (Repositories user repo RepositoryHooks)
 
 -- TODO This doesn't handle a response of:
 --  responseBody = "{\"error\":\"bad_verification_code\",\"error_description\":\"The code passed is incorrect or expired.\",\"error_uri\":\"https://developer.github.com/v3/oauth/#bad-verification-code\"}"
