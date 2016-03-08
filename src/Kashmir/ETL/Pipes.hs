@@ -7,13 +7,11 @@ import           Pipes.Binary
 
 unfoldrPipe :: Monad m
             => (b -> m (Maybe (a,b))) -> b -> Producer a m ()
-unfoldrPipe f b =
-  do r <- lift $ f b
-     case r of
-       Just (a,b') ->
-         yield a >>
-         unfoldrPipe f b'
-       Nothing -> return ()
+unfoldrPipe f seed =
+  do result <- lift $ f seed
+     case result of
+       Nothing -> return mempty
+       Just (page,seed') -> yield page >> unfoldrPipe f seed'
 
 flattenPipe :: Monad m => Pipe [a] a m ()
 flattenPipe =
