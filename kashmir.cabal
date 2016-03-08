@@ -96,6 +96,8 @@ test-suite kashmir-test
                      , kashmir
                      , lens
                      , parsec
+                     , mtl
+                     , containers
                      , quickcheck-instances
                      , text
                      , yaml
