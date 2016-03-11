@@ -1,42 +1,46 @@
+{-# LANGUAGE DeriveAnyClass      #-}
 {-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell     #-}
 {-# LANGUAGE TypeFamilies        #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE ViewPatterns        #-}
 module Kashmir.Github.Api
        (getUserDetails, getUserOrganizations, getUserRepositories,getRepositoryHooks
-       ,requestAccess,createRepositoryHook,deleteRepositoryHook,toUrl,Sitemap(..),RepositorySitemap(..))
+       ,requestAccess,createRepositoryHook,deleteRepositoryHook,toUrl,Sitemap(..),RepositorySitemap(..),GithubError(..),GithubErrorMessage(..))
        where
 
-import           Control.Category                    ((.))
-import           Control.Exception                   (try)
+import           Control.Category            ((.))
+import           Control.Exception           (try)
 import           Control.Lens
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
 import           Data.Aeson
-import           Data.ByteString                     hiding (pack, putStrLn,
-                                                      unpack)
+import           Data.Bifunctor
+import           Data.ByteString             hiding (pack, putStrLn, unpack)
+import           Data.ByteString.Lazy        (fromStrict)
+import qualified Data.CaseInsensitive        as CI
+import           Data.Map                    (Map)
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Text
 import           Data.Text.Encoding
 import           Kashmir.Github.Types
 import           Kashmir.Github.Types.Common
-import           Kashmir.Github.Types.Hook           (Hook)
-import           Kashmir.Github.Types.Organization
-import           Kashmir.Github.Types.Repository
-import qualified Kashmir.Github.Types.RepositoryHook as RH
-import           Kashmir.Github.Types.User
+import           Kashmir.Github.Types.Hook   (Hook)
 import           Kashmir.Unfold
-import           Kashmir.Web                         (mimeTypeJson)
-import           Network.Wreq
-import           Prelude                             hiding ((.))
+import           Kashmir.Web                 (mimeTypeJson)
+import           Network.HTTP.Client         (HttpException (..))
+import           Network.HTTP.Types.Status   (statusCode)
+import           Network.Wreq                hiding (statusCode)
+import           Prelude                     hiding ((.))
 import           Text.Boomerang.HStack
 import           Text.Boomerang.TH
 import           Text.Printf
-import           Web.Routes                          hiding (URL)
-import           Web.Routes.Boomerang                hiding ((.~))
+import           Web.Routes                  hiding (URL)
+import           Web.Routes.Boomerang        hiding ((.~))
 
 data RepositorySitemap
   = RepositoryDetails
@@ -138,18 +142,44 @@ githubGetPages
   => Sitemap -> ReaderT AccessToken IO [a]
 githubGetPages uri = unfoldrM githubGetPage (Just (makeGithubUrl uri))
 
-getUserDetails :: ReaderT AccessToken IO User
+getUserDetails :: ReaderT AccessToken IO GithubUser
 getUserDetails = githubGet UserDetails
 
-getUserOrganizations :: ReaderT AccessToken IO [Organization]
+getUserOrganizations :: ReaderT AccessToken IO [GithubOrganization]
 getUserOrganizations = githubGetPages UserOrganizations
 
-getUserRepositories :: ReaderT AccessToken IO [Repository]
+getUserRepositories :: ReaderT AccessToken IO [GithubRepository]
 getUserRepositories = githubGetPages UserRepositories
 
-getRepositoryHooks :: Text -> Text -> ReaderT AccessToken IO (Either JSONError [RH.RepositoryHook])
-getRepositoryHooks user repo =
-  mapReaderT try $ githubGetPages (Repositories user repo RepositoryHooks)
+data GithubErrorMessage =
+  GithubErrorMessage {message :: Text
+                      ,errors :: [Map Text Text]}
+  deriving (Show,Generic,FromJSON)
+
+data GithubError
+  = GithubError GithubErrorMessage
+  | UnhandledGithubError HttpException
+  deriving (Show,Generic)
+
+handleGithubError :: HttpException -> GithubError
+handleGithubError err@(StatusCodeException (statusCode -> 422) headerList _) =
+  let rawMessage :: Maybe GithubErrorMessage =
+        lookup (CI.mk "X-Response-Body-Start") headerList >>=
+        decode . fromStrict
+  in case rawMessage of
+       Nothing -> UnhandledGithubError err
+       Just message -> GithubError message
+
+handleGithubError err = UnhandledGithubError err
+
+tryGithub :: IO a -> IO (Either GithubError a)
+tryGithub block = first handleGithubError <$> try block
+
+getRepositoryHooks :: Text -> Text -> ReaderT AccessToken IO (Either GithubError [GithubRepositoryHook])
+getRepositoryHooks ownerLogin repoName =
+  mapReaderT tryGithub $
+  do rawHooks <- githubGetPages (Repositories ownerLogin repoName RepositoryHooks)
+     return (fromRaw ownerLogin repoName <$> rawHooks)
 
 -- TODO This doesn't handle a response of:
 --  responseBody = "{\"error\":\"bad_verification_code\",\"error_description\":\"The code passed is incorrect or expired.\",\"error_uri\":\"https://developer.github.com/v3/oauth/#bad-verification-code\"}"
@@ -164,11 +194,16 @@ requestAccess config code =
      view responseBody <$> asJSON response
 
 createRepositoryHook
-  :: Text -> Text -> Hook -> ReaderT AccessToken IO RH.RepositoryHook
-createRepositoryHook user repo =
-  postGithub (Repositories user repo RepositoryHooks)
+  :: Text -> Text -> Hook -> ReaderT AccessToken IO (Either GithubError GithubRepositoryHook)
+createRepositoryHook ownerLogin repoName hook =
+  mapReaderT tryGithub $
+  do (rawHook :: RawRepositoryHook) <-
+       postGithub (Repositories ownerLogin repoName RepositoryHooks)
+                  hook
+     return (fromRaw ownerLogin repoName rawHook)
 
 deleteRepositoryHook
-  :: Text -> Text -> Int -> ReaderT AccessToken IO ()
-deleteRepositoryHook user repo hookId =
-  deleteGithub (Repositories user repo (RepositoryHook hookId))
+  :: Text -> Text -> Int -> ReaderT AccessToken IO (Either GithubError ())
+deleteRepositoryHook ownerLogin repoName hook =
+  mapReaderT tryGithub $
+  deleteGithub (Repositories ownerLogin repoName (RepositoryHook hook))

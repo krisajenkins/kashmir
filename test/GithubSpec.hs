@@ -5,15 +5,14 @@ import           Control.Error.Safe
 import           Control.Lens
 import           Control.Monad
 import           Control.Monad.Reader
-import           Data.Set                            as Set
-import           Data.Text                           (pack)
+import           Data.Set                  as Set
+import           Data.Text                 (pack)
 import           Data.Yaml
 import           Kashmir.Github
-import           Kashmir.Github.Types.Hook           as Hook
-import qualified Kashmir.Github.Types.RepositoryHook as RH
+import qualified Kashmir.Github.Types.Hook as Hook
 import           System.Environment
 import           Test.Hspec
-import           Test.QuickCheck.Instances           ()
+import           Test.QuickCheck.Instances ()
 
 spec :: Spec
 spec =
@@ -30,12 +29,13 @@ routesSpec =
         [("/user",UserDetails)
         ,("/user/orgs",UserOrganizations)
         ,("/user/repos",UserRepositories)
-        ,("/repos/kris/project",Repositories "kris" "project" RepositoryDetails)
-        ,("/repos/kris/project/hooks"
-         ,(Repositories "kris" "project" RepositoryHooks))
-        ,("/repos/kris/project/hooks/12345"
-         ,Repositories "kris"
-                       "project"
+        ,("/repos/krisajenkins/kashmir"
+         ,Repositories "krisajenkins" "kashmir" RepositoryDetails)
+        ,("/repos/krisajenkins/kashmir/hooks"
+         ,(Repositories "krisajenkins" "kashmir" RepositoryHooks))
+        ,("/repos/krisajenkins/kashmir/hooks/12345"
+         ,Repositories "krisajenkins"
+                       "kashmir"
                        (RepositoryHook 12345))]
 
 userDetailsSpec :: Spec
@@ -55,30 +55,33 @@ userRepositorySpec =
   do repos <- getUserRepositories
      liftIO $ length repos `shouldSatisfy` (> 50)
 
+newHook :: Hook.Hook
+newHook =
+  Hook.Hook {Hook.name = Hook.Web
+            ,Hook.events = Set.singleton Hook.Push
+            ,Hook.active = True
+            ,Hook.config =
+               Hook.HookConfig {Hook.url = "https://www.jenkster.com/kashmir"
+                               ,Hook.contentType = Hook.Json
+                               ,Hook.secret = Nothing
+                               ,Hook.insecureSsl = False}}
+
 repositoryHooksSpec :: Spec
 repositoryHooksSpec =
-  let username = "krisajenkins"
-      repoName = "autoheadline"
+  let ownerId = "krisajenkins"
+      repoId = "kashmir"
   in describe "Repository hook fetching" $
      do it "Fetches the current repository hooks." . withToken $
-          void (getRepositoryHooks username repoName)
+          void (getRepositoryHooks ownerId repoId)
         it "Creates and deletes a hook" . withToken $
-          (do let newHook =
-                    Hook {name = Web
-                         ,events = Set.singleton Push
-                         ,active = False
-                         ,config =
-                            HookConfig {url =
-                                          "https://www.jenkster.com/kashmir"
-                                       ,contentType = Json
-                                       ,secret = Nothing
-                                       ,insecureSsl = False}}
-              createdHook <- createRepositoryHook username repoName newHook
-              let createdHookId = view RH.githubRepositoryHookId createdHook
-              deleteRepositoryHook username repoName createdHookId)
+          void (do Right createdHook <-
+                     createRepositoryHook ownerId repoId newHook
+                   let createdHookId =
+                         view githubRepositoryHookGithubRepositoryHookId createdHook
+                   deleteRepositoryHook ownerId repoId createdHookId)
 
 loadConfig :: IO (Either ParseException AccessToken)
-loadConfig = decodeFileEither "kashmir.yaml"
+loadConfig = decodeFileEither "/Users/kris/Work/OpenSource/Kashmir/kashmir.yaml"
 
 loadToken :: IO AccessToken
 loadToken =

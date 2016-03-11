@@ -26,10 +26,6 @@ library
                      , Kashmir.Github.Types
                      , Kashmir.Github.Types.Common
                      , Kashmir.Github.Types.Hook
-                     , Kashmir.Github.Types.Organization
-                     , Kashmir.Github.Types.Repository
-                     , Kashmir.Github.Types.RepositoryHook
-                     , Kashmir.Github.Types.User
                      , Kashmir.Snap.Snaplet.Postgresql
                      , Kashmir.Snap.Snaplet.Random
                      , Kashmir.Snap.Utils
@@ -47,11 +43,15 @@ library
                      , binary
                      , boomerang
                      , bytestring
+                     , case-insensitive
                      , cases
                      , containers
                      , directory >= 1.2.2.0
+                     , errors
                      , esqueleto >= 2.2.11 && < 3.0
                      , http-api-data
+                     , http-client
+                     , http-types
                      , jwt
                      , lens
                      , lifted-base >= 0.2.3.1
@@ -74,6 +74,7 @@ library
                      , text
                      , time >= 1.4.2
                      , transformers >= 0.3.0.0
+                     , unordered-containers
                      , uuid
                      , web-routes
                      , web-routes-boomerang
