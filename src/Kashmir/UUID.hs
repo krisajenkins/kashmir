@@ -5,7 +5,7 @@ module Kashmir.UUID (toStrictByteString, module X) where
 
 import           Data.Aeson
 import           Data.ByteString      (ByteString)
-import           Data.ByteString.Lazy (toStrict)
+
 import           Data.Monoid
 import           Data.Text
 import           Data.Text.Encoding   (decodeUtf8, encodeUtf8)
@@ -54,4 +54,4 @@ instance FromHttpApiData UUID where
       Just x -> Right x
 
 toStrictByteString :: UUID -> ByteString
-toStrictByteString = toStrict . toByteString
+toStrictByteString = encodeUtf8 . toText
