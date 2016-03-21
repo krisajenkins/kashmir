@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module GithubSpec where
+module Kashmir.GithubSpec where
 
 import           Control.Error.Safe
 import           Control.Lens
@@ -20,7 +20,6 @@ spec =
      userDetailsSpec
      userOrganizationSpec
      userRepositorySpec
-     repositoryHooksSpec
 
 routesSpec :: Spec
 routesSpec =

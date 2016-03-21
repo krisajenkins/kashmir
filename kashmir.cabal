@@ -87,7 +87,7 @@ test-suite kashmir-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  other-modules:       GithubSpec
+  other-modules:       Kashmir.GithubSpec
   build-depends:       QuickCheck
                      , aeson
                      , base
