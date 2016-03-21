@@ -62,7 +62,7 @@ newHook =
             ,Hook.config =
                Hook.HookConfig {Hook.url = "https://www.jenkster.com/kashmir"
                                ,Hook.contentType = Hook.Json
-                               ,Hook.secret = Nothing
+                               ,Hook.secret = Hook.WebhookSecret "ASDFASDFADSF"
                                ,Hook.insecureSsl = False}}
 
 repositoryHooksSpec :: Spec

@@ -22,10 +22,19 @@ data ContentType
 instance ToJSON ContentType where
   toJSON = asSnakeString
 
+newtype WebhookSecret = WebhookSecret {unWebhookSecret :: Text}
+                        deriving (Show,Eq)
+
+instance ToJSON WebhookSecret where
+  toJSON (WebhookSecret t) = toJSON t
+
+instance FromJSON WebhookSecret where
+  parseJSON t = WebhookSecret <$> parseJSON t
+
 data HookConfig =
   HookConfig {url         :: URL
              ,contentType :: ContentType
-             ,secret      :: Maybe Text
+             ,secret      :: WebhookSecret
              ,insecureSsl :: Bool}
   deriving (Show,Eq,Generic,ToJSON)
 
