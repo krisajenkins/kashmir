@@ -5,8 +5,9 @@ import           Data.Aeson
 import           Data.ByteString
 import           Snap
 
-mimeTypeJson :: ByteString
+mimeTypeJson, mimeTypeCss :: ByteString
 mimeTypeJson = "application/json"
+mimeTypeCss = "text/css"
 
 jsonResponse :: MonadSnap m => m ()
 jsonResponse = modifyResponse $ setContentType mimeTypeJson
