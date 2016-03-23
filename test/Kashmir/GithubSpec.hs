@@ -80,7 +80,8 @@ repositoryHooksSpec =
                    deleteRepositoryHook ownerId repoId createdHookId)
 
 loadConfig :: IO (Either ParseException AccessToken)
-loadConfig = decodeFileEither "/Users/kris/Work/OpenSource/Kashmir/kashmir.yaml"
+loadConfig =
+  decodeFileEither "/Users/kris/Work/OpenSource/Kashmir/kashmir.yaml"
 
 loadToken :: IO AccessToken
 loadToken =
