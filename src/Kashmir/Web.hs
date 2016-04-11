@@ -9,14 +9,34 @@ mimeTypeJson, mimeTypeCss :: ByteString
 mimeTypeJson = "application/json"
 mimeTypeCss = "text/css"
 
+
+------------------------------------------------------------
+
 jsonResponse :: MonadSnap m => m ()
 jsonResponse = modifyResponse $ setContentType mimeTypeJson
+
 
 writeJSON :: (ToJSON a,MonadSnap m)
           => a -> m ()
 writeJSON a =
   do jsonResponse
      (writeLBS . encode) a
+
+
+writeJSONMaybe :: (MonadSnap m,ToJSON a)
+               => Maybe a -> m ()
+writeJSONMaybe (Just x) = writeJSON x
+writeJSONMaybe Nothing = notfound
+
+writeJSONEither :: (MonadSnap m,ToJSON e,ToJSON a)
+                => Either e a -> m ()
+writeJSONEither (Right x) = writeJSON x
+writeJSONEither (Left err) =
+  do modifyResponse $ setResponseCode 500
+     writeJSON err
+     getResponse >>= finishWith
+
+------------------------------------------------------------
 
 handleError :: MonadSnap m => Int -> m b
 handleError errorCode =
