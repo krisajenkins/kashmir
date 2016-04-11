@@ -5,7 +5,6 @@ module Kashmir.Snap.Utils
 import           Data.ByteString
 import           Data.Monoid
 import           Data.Text.Encoding
-import           Database.Persist   ()
 import           Prelude
 import           Snap
 
