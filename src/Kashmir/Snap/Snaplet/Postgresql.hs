@@ -14,11 +14,11 @@ import           Kashmir.Database.Postgresql
 import           Snap
 
 initDb :: DatabaseConfig -> SnapletInit a ConnectionPool
-initDb config =
+initDb =
   makeSnaplet "connection-pool" "A simple Postgresql connection pool" Nothing .
-  liftIO . runStdoutLoggingT $
-  createPostgresqlPool (C.pack (view connectionString config))
-                       (view poolSize config)
+  liftIO . runStdoutLoggingT .
+  (createPostgresqlPool <$> view (connectionString . to C.pack)
+                        <*> view poolSize)
 
 sqlHandler :: (MonadIO m,MonadState ConnectionPool m)
            => SqlPersistM a -> m a
