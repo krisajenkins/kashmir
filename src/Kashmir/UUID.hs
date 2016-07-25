@@ -17,7 +17,7 @@ import           Web.PathPieces
 
 instance PersistField UUID where
   toPersistValue :: UUID -> PersistValue
-  toPersistValue = PersistDbSpecific . encodeUtf8 . toText
+  toPersistValue = PersistDbSpecific . toStrictByteString
   fromPersistValue
     :: PersistValue -> Either Text UUID
   fromPersistValue (PersistDbSpecific s) =
