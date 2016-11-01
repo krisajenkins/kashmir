@@ -4,4 +4,4 @@ packages:
 extra-deps:
 - aeson-casing-0.1.0.5
 - snap-cors-1.2.9
-resolver: lts-5.4
+resolver: lts-6.22
