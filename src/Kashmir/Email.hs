@@ -13,10 +13,12 @@ import           Data.Text
 import           Database.Persist
 import           Database.Persist.Sql
 import           GHC.Generics
+import           Web.HttpApiData
+import           Web.PathPieces
 
 newtype Email = Email
     { unEmail :: Text
-    } deriving (Show, Read, Eq, Generic)
+    } deriving (Show, Read, Eq, Ord, Generic)
 
 parseEmail :: Text -> Either Text Email
 parseEmail t = Right (Email t)
@@ -33,3 +35,16 @@ instance ToJSON Email where
 
 instance FromJSON Email where
     parseJSON t = Email <$> parseJSON t
+
+instance PathPiece Email where
+    toPathPiece (Email t) = t
+    fromPathPiece t =
+        case parseEmail t of
+            Left _ -> Nothing
+            Right e -> Just e
+
+instance ToHttpApiData Email where
+    toUrlPiece (Email t) = t
+
+instance FromHttpApiData Email where
+    parseUrlPiece = parseEmail
